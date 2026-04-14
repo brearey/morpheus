@@ -38,6 +38,7 @@ int sum_helper(matrix_t *A, matrix_t *B, matrix_t *result, int signer);
 void calc_minor(matrix_t *A, matrix_t *temp, int ex_row, int ex_col);
 int copy_submatrix(matrix_t *src, matrix_t *dst, int skip_row, int skip_col);
 int compute_determinant(matrix_t *A, double *result);
+int compute_complement(matrix_t *A, matrix_t *result, int i, int j);
 int compute_complements(matrix_t *A, matrix_t *result);
 
 #endif

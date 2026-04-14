@@ -348,6 +348,32 @@ int compute_determinant(matrix_t *A, double *result) {
   return status;
 }
 
+int compute_complement(matrix_t *A, matrix_t *result, int i, int j) {
+  int status = OK;
+  matrix_t minor;
+
+  if (s21_create_matrix(A->rows - 1, A->columns - 1, &minor) != OK) {
+    status = INCORRECT_MATRIX;
+  } else {
+    copy_submatrix(A, &minor, i, j);
+    double minor_det = 0.0;
+    int det_status = compute_determinant(&minor, &minor_det);
+
+    if (det_status != OK) {
+      status = det_status;
+    } else {
+      double sign = ((i + j) % 2 == 0) ? 1.0 : -1.0;
+      result->matrix[i][j] = sign * minor_det;
+      if (!isfinite(result->matrix[i][j])) {
+        status = INCORRECT_MATRIX;
+      }
+    }
+    s21_remove_matrix(&minor);
+  }
+
+  return status;
+}
+
 int compute_complements(matrix_t *A, matrix_t *result) {
   int status = s21_create_matrix(A->rows, A->columns, result);
 
@@ -355,24 +381,7 @@ int compute_complements(matrix_t *A, matrix_t *result) {
   while (i < A->rows && status == OK) {
     int j = 0;
     while (j < A->columns && status == OK) {
-      matrix_t minor;
-      if (s21_create_matrix(A->rows - 1, A->columns - 1, &minor) == OK) {
-        copy_submatrix(A, &minor, i, j);
-        double minor_det = 0.0;
-        int det_status = compute_determinant(&minor, &minor_det);
-        if (det_status == OK) {
-          double sign = ((i + j) % 2 == 0) ? 1.0 : -1.0;
-          result->matrix[i][j] = sign * minor_det;
-          if (!isfinite(result->matrix[i][j])) {
-            status = INCORRECT_MATRIX;
-          }
-        } else {
-          status = det_status;
-        }
-        s21_remove_matrix(&minor);
-      } else {
-        status = INCORRECT_MATRIX;
-      }
+      status = compute_complement(A, result, i, j);
       j++;
     }
     i++;
